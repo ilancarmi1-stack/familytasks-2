@@ -1,0 +1,1417 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="FamilyTasks">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#2563eb">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8F%A0%3C/text%3E%3C/svg%3E">
+<title>FamilyTasks 🏠</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --blue:#2563eb;--blue-light:#dbeafe;--blue-dark:#1e40af;
+  --green:#16a34a;--green-light:#dcfce7;
+  --orange:#ea580c;--orange-light:#fff7ed;
+  --purple:#7c3aed;--purple-light:#ede9fe;
+  --pink:#e8426a;--pink-light:#fde8ee;
+  --bg:#f0f7ff;--surface:#ffffff;--border:#c7d8ed;
+  --text:#0f172a;--muted:#64748b;--r:16px;
+  --grad1:var(--blue);--grad2:var(--purple);
+}
+[data-theme="sunset"]{
+  --blue:#d97706;--blue-light:#fef3c7;--blue-dark:#92400e;
+  --purple:#dc2626;--purple-light:#fee2e2;
+  --bg:#fffbeb;--border:#fde68a;--muted:#78716c;
+  --grad1:#f59e0b;--grad2:#ef4444;
+}
+[data-theme="forest"]{
+  --blue:#15803d;--blue-light:#dcfce7;--blue-dark:#14532d;
+  --purple:#0369a1;--purple-light:#e0f2fe;
+  --bg:#f0fdf4;--border:#86efac;--muted:#52525b;
+  --grad1:#16a34a;--grad2:#0284c7;
+}
+[data-theme="candy"]{
+  --blue:#db2777;--blue-light:#fce7f3;--blue-dark:#831843;
+  --purple:#7c3aed;--purple-light:#ede9fe;
+  --bg:#fdf4ff;--border:#f0abfc;--muted:#6b7280;
+  --grad1:#ec4899;--grad2:#a855f7;
+}
+[data-theme="night"]{
+  --blue:#60a5fa;--blue-light:#1e3a5f;--blue-dark:#93c5fd;
+  --purple:#a78bfa;--purple-light:#2e1065;
+  --green:#4ade80;--green-light:#052e16;
+  --bg:#0f172a;--surface:#1e293b;--border:#334155;
+  --text:#f1f5f9;--muted:#94a3b8;
+  --grad1:#3b82f6;--grad2:#8b5cf6;
+}
+/* Theme picker */
+.theme-bar{display:flex;gap:7px;padding:4px 0 2px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.theme-dot{width:30px;height:30px;border-radius:50%;border:3px solid transparent;cursor:pointer;transition:all .2s;flex-shrink:0}
+.theme-dot.active{border-color:#fff;box-shadow:0 0 0 2px rgba(255,255,255,.5),0 2px 8px rgba(0,0,0,.3);transform:scale(1.15)}
+.theme-dot[data-t="default"]{background:linear-gradient(135deg,#2563eb,#7c3aed)}
+.theme-dot[data-t="sunset"]{background:linear-gradient(135deg,#f59e0b,#ef4444)}
+.theme-dot[data-t="forest"]{background:linear-gradient(135deg,#16a34a,#0284c7)}
+.theme-dot[data-t="candy"]{background:linear-gradient(135deg,#ec4899,#a855f7)}
+.theme-dot[data-t="night"]{background:linear-gradient(135deg,#1e293b,#4c1d95)}
+html,body{height:100%;overflow:hidden;font-family:'Heebo',sans-serif}
+body{background:var(--bg);color:var(--text);display:flex;flex-direction:column;align-items:center;max-width:520px;margin:0 auto;position:relative}
+
+.screen{display:none;width:100%;height:100vh;height:100dvh;flex-direction:column;overflow:hidden}
+.screen.active{display:flex}
+
+/* FLYING */
+.hfly{position:fixed;pointer-events:none;z-index:9999;animation:fup 2.5s ease-out forwards}
+@keyframes fup{0%{opacity:1;transform:translateY(0) scale(1)}60%{opacity:1}100%{opacity:0;transform:translateY(var(--dy)) scale(.5) rotate(var(--rot))}}
+
+/* ══ SETUP ══ */
+#s-setup{
+  background:linear-gradient(160deg,#eff6ff 0%,#dbeafe 55%,#ede9fe 100%);
+  justify-content:flex-start;align-items:center;
+  padding:24px 18px 36px;gap:16px;overflow-y:auto
+}
+.hero{text-align:center}
+.hrt{font-size:56px;display:block;animation:hb 2s ease infinite}
+@keyframes hb{0%,100%{transform:scale(1)}14%{transform:scale(1.15)}28%{transform:scale(1)}42%{transform:scale(1.08)}}
+.hero h1{font-size:24px;font-weight:900;color:var(--blue-dark);margin-top:6px}
+.hero p{font-size:13px;color:var(--muted);margin-top:3px}
+
+.sec-label{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.9px;text-transform:uppercase;text-align:center;margin-top:4px}
+.member-list{width:100%;display:flex;flex-direction:column;gap:7px}
+.member-row{display:flex;align-items:center;gap:8px;background:#fff;border:2px solid var(--border);border-radius:12px;padding:10px 12px;transition:all .15s}
+.member-row.parent{border-color:#93c5fd}
+.member-row.child{border-color:#86efac}
+.member-row .m-emoji{font-size:24px;cursor:pointer}
+.m-avatar,.kc-avatar,.ac-avatar,.ks-avatar,.bon-avatar{border-radius:50%;object-fit:cover;border:2px solid var(--border)}
+.m-avatar{width:36px;height:36px;cursor:pointer}
+.kc-avatar{width:24px;height:24px}
+.ac-avatar{width:22px;height:22px}
+.ks-avatar{width:38px;height:38px}
+.bon-avatar{width:30px;height:30px}
+.photo-btn{background:var(--blue-light);border:1.5px dashed var(--blue);border-radius:10px;padding:8px 14px;margin-top:10px;cursor:pointer;font-size:13px;font-weight:600;color:var(--blue-dark);display:flex;align-items:center;justify-content:center;gap:6px}
+.tm-section{background:linear-gradient(135deg,#eff6ff,#ede9fe);border:2px solid #c7d2fe;border-radius:14px;padding:12px!important;margin-bottom:13px}
+.task-members-grid{display:flex;flex-wrap:wrap;gap:7px;margin-top:6px}
+.tm-chip{display:flex;align-items:center;gap:6px;padding:8px 12px;border-radius:11px;border:2.5px solid var(--border);background:#fff;cursor:pointer;font-size:13px;font-weight:700;color:var(--muted);transition:all .2s;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.tm-chip:active{transform:scale(.95)}
+.tm-chip.tm-sel{border-color:var(--green);background:var(--green-light);color:#15803d;box-shadow:0 2px 8px rgba(22,163,74,.2)}
+.tm-chip.tm-sel.tm-parent{border-color:var(--purple);background:var(--purple-light);color:#5b21b6;box-shadow:0 2px 8px rgba(124,58,237,.2)}
+.tm-chip .tm-ava{font-size:20px}
+.tm-chip .tm-img{width:24px;height:24px;border-radius:50%;object-fit:cover;border:2px solid var(--border)}
+.tm-actions{margin-top:8px;display:flex;gap:8px}
+.tm-all-btn{font-size:12px;font-weight:700;color:var(--blue);cursor:pointer;padding:5px 10px;border-radius:8px;background:rgba(255,255,255,.8);border:1px solid var(--border)}
+.member-row input{flex:1;border:none;outline:none;font-family:'Heebo',sans-serif;font-size:15px;font-weight:600;background:transparent;color:var(--text)}
+.member-row input::placeholder{color:#b0c4de}
+.member-row .m-role{font-size:10px;font-weight:700;color:var(--muted);background:var(--blue-light);padding:2px 8px;border-radius:6px}
+.member-row.child .m-role{background:var(--green-light);color:#15803d}
+.m-del{background:none;border:none;font-size:16px;cursor:pointer;padding:4px;opacity:.4;transition:opacity .15s}
+.m-del:hover,.m-del:active{opacity:1}
+.add-member{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;padding:10px;border-radius:12px;border:2px dashed var(--border);background:transparent;color:var(--muted);font-family:'Heebo',sans-serif;font-size:13px;font-weight:600;cursor:pointer}
+.add-member:active{background:var(--blue-light)}
+
+.go-btn{width:100%;padding:15px;border-radius:15px;border:none;background:linear-gradient(135deg,var(--grad1),var(--grad2));color:#fff;font-family:'Heebo',sans-serif;font-size:16px;font-weight:900;cursor:pointer;box-shadow:0 5px 20px rgba(37,99,235,.3);margin-top:6px}
+.go-btn:active{transform:scale(.97)}
+
+/* ══ MAIN ══ */
+.topbar{background:linear-gradient(135deg,var(--grad1),var(--grad2));padding:10px 14px 8px;flex-shrink:0}
+.tb1{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.app-ttl{font-size:15px;font-weight:900;color:#fff}
+.app-date{font-size:11px;color:rgba(255,255,255,.7)}
+
+.kids-bar{display:flex;gap:6px;overflow-x:auto;padding:2px 0 4px;-webkit-overflow-scrolling:touch}
+.kid-chip{display:flex;flex-direction:column;align-items:center;min-width:62px;padding:6px 8px;border-radius:12px;background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.25);cursor:pointer;transition:all .15s}
+.kid-chip.sel{background:rgba(255,255,255,.3);border-color:rgba(255,255,255,.6);box-shadow:0 2px 10px rgba(0,0,0,.15)}
+.kid-chip .kc-em{font-size:20px}
+.kid-chip .kc-nm{font-size:10px;font-weight:700;color:#fff;white-space:nowrap;max-width:56px;overflow:hidden;text-overflow:ellipsis}
+.kid-chip .kc-pt{font-size:14px;font-weight:900;color:#fbbf24}
+.kid-chip-all{background:rgba(255,255,255,.1);border-style:dashed}
+.kid-chip.parent-chip{border-color:rgba(147,197,253,.5);background:rgba(59,130,246,.15)}
+.kid-chip.parent-chip.sel{border-color:rgba(147,197,253,.8);background:rgba(59,130,246,.3)}
+
+.tlist{flex:1;overflow-y:auto;padding:8px 10px 80px;-webkit-overflow-scrolling:touch}
+
+/* Task card */
+.tcard{
+  background:var(--surface);border-radius:14px;border:1.5px solid var(--border);
+  margin-bottom:8px;padding:10px 10px 8px;transition:all .15s;
+}
+.tcard.done{border-color:#86efac;background:#f0fdf4}
+.tc-top{display:flex;align-items:flex-start;gap:8px}
+.tc-em{font-size:22px}
+.tc-info{flex:1;min-width:0}
+.tc-nm{font-size:14px;font-weight:700;line-height:1.3}
+.tc-pts{font-size:10px;color:var(--muted);font-weight:600}
+.tc-edit{background:var(--blue-light);border:1.5px solid var(--border);border-radius:9px;font-size:16px;cursor:pointer;padding:6px 9px;opacity:.7;transition:all .15s;line-height:1}
+.tc-edit:active,.tc-edit:hover{opacity:1;background:var(--blue-light);border-color:var(--blue)}
+
+.tc-assign{display:flex;gap:5px;margin-top:7px;flex-wrap:wrap;align-items:center}
+.no-assign{font-size:11px;color:var(--muted);font-style:italic;padding:4px 0}
+.assign-chip{
+  display:flex;align-items:center;gap:5px;
+  padding:8px 13px;border-radius:12px;
+  border:2px solid var(--border);background:var(--bg);
+  cursor:pointer;font-family:'Heebo',sans-serif;font-size:13px;font-weight:700;
+  color:var(--muted);transition:all .13s;
+}
+.assign-chip .ac-em{font-size:18px}
+.assign-chip:active{transform:scale(.95)}
+.assign-chip.assigned{border-color:var(--blue);background:var(--blue-light);color:var(--blue-dark)}
+.assign-chip.completed{border-color:var(--green);background:var(--green-light);color:#15803d}
+
+.add-task-btn{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;padding:12px;border-radius:14px;border:2px dashed var(--border);background:transparent;color:var(--muted);font-family:'Heebo',sans-serif;font-size:13px;font-weight:600;cursor:pointer;margin-top:4px}
+.add-task-btn:active{background:var(--blue-light)}
+
+/* Bottom bar */
+.bot{position:fixed;bottom:0;inset-inline:0;max-width:520px;margin:0 auto;background:rgba(255,255,255,.96);border-top:1px solid var(--border);padding:8px 10px max(10px,env(safe-area-inset-bottom));display:flex;gap:6px;backdrop-filter:blur(10px);z-index:200}
+.sumbtn{flex:1;padding:12px;border-radius:13px;border:none;background:linear-gradient(135deg,var(--grad1),var(--grad2));color:#fff;font-family:'Heebo',sans-serif;font-size:14px;font-weight:900;cursor:pointer;box-shadow:0 3px 14px rgba(37,99,235,.25)}
+.sumbtn:active{transform:scale(.97)}
+.icobtn{padding:12px 13px;border-radius:13px;border:1.5px solid var(--border);background:var(--surface);font-size:16px;cursor:pointer}
+.icobtn:active{background:var(--blue-light)}
+.bonus-btn{padding:12px 13px;border-radius:13px;border:none;background:linear-gradient(135deg,#fbbf24,#f59e0b);font-size:16px;cursor:pointer;box-shadow:0 2px 8px rgba(245,158,11,.3);animation:bonpulse 2.5s ease infinite}
+@keyframes bonpulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+
+/* ══ OVERLAYS ══ */
+.ov{position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:500;display:none;align-items:flex-end;justify-content:center;backdrop-filter:blur(3px)}
+.ov.open{display:flex}
+.sheet{background:var(--surface);border-radius:22px 22px 0 0;width:100%;max-width:520px;padding:18px 18px max(26px,env(safe-area-inset-bottom));max-height:88vh;max-height:88dvh;overflow-y:auto;animation:su .3s cubic-bezier(.32,1.18,.6,1)}
+@keyframes su{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.handle{width:36px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 16px}
+
+/* Summary */
+.sum-ttl{font-size:20px;font-weight:900;text-align:center;color:var(--blue-dark);margin-bottom:3px}
+.sum-dt{font-size:12px;color:var(--muted);text-align:center;margin-bottom:14px}
+.kid-sum-card{display:flex;align-items:center;gap:10px;padding:12px;background:var(--bg);border:1.5px solid var(--border);border-radius:13px;margin-bottom:7px}
+.kid-sum-card.top{border-color:var(--blue);background:var(--blue-light);box-shadow:0 3px 12px rgba(37,99,235,.12)}
+.ks-em{font-size:28px}
+.ks-info{flex:1}
+.ks-nm{font-size:14px;font-weight:800}
+.ks-dt{font-size:10px;color:var(--muted)}
+.ks-pt{font-size:26px;font-weight:900;color:var(--blue-dark)}
+.kid-sum-card.top .ks-pt{color:var(--blue)}
+.tipcard{background:linear-gradient(135deg,#eff6ff,#ede9fe);border:1.5px solid var(--border);border-radius:14px;padding:13px;margin:10px 0}
+.tip-lbl{font-size:10px;font-weight:700;color:var(--purple);letter-spacing:.7px;text-transform:uppercase;margin-bottom:5px}
+.tip-txt{font-size:13px;line-height:1.65;font-weight:500}
+
+.close-btn{width:100%;padding:13px;border-radius:13px;border:none;background:linear-gradient(135deg,var(--grad1),var(--grad2));color:#fff;font-family:'Heebo',sans-serif;font-size:15px;font-weight:900;cursor:pointer;box-shadow:0 3px 14px rgba(37,99,235,.25);margin-top:6px}
+.close-btn:active{transform:scale(.97)}
+
+/* Add/Edit task */
+.mod-ttl{font-size:17px;font-weight:900;margin-bottom:14px}
+.fg{margin-bottom:13px}
+.fl{display:block;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.6px;text-transform:uppercase;margin-bottom:5px}
+.fi{width:100%;padding:11px 13px;border-radius:11px;border:2px solid var(--border);background:var(--bg);font-family:'Heebo',sans-serif;font-size:14px;color:var(--text);outline:none;transition:border-color .15s}
+.fi:focus{border-color:var(--blue)}
+.emw{display:flex;gap:5px;flex-wrap:wrap;padding:2px 0}
+.emo{font-size:23px;padding:4px 6px;border-radius:9px;cursor:pointer;border:2px solid transparent;transition:all .12s}
+.emo.sel,.emo:active{background:var(--blue-light);border-color:var(--blue)}
+.macts{display:flex;gap:7px;margin-top:4px}
+.bcl{flex:1;padding:12px;border-radius:11px;border:1.5px solid var(--border);background:var(--bg);color:var(--muted);font-family:'Heebo',sans-serif;font-size:14px;font-weight:700;cursor:pointer}
+.bsv{flex:2;padding:12px;border-radius:11px;border:none;background:linear-gradient(135deg,var(--grad1),var(--grad2));color:#fff;font-family:'Heebo',sans-serif;font-size:14px;font-weight:900;cursor:pointer;box-shadow:0 3px 10px rgba(37,99,235,.2)}
+.del-btn{width:100%;padding:11px;border-radius:11px;border:1.5px solid #fca5a5;background:#fef2f2;color:#dc2626;font-family:'Heebo',sans-serif;font-size:13px;font-weight:700;cursor:pointer;margin-top:6px}
+.del-btn:active{background:#fee2e2}
+
+/* Slider */
+.pts-slider-wrap{display:flex;align-items:center;gap:10px;direction:ltr}
+.pts-slider{-webkit-appearance:none;appearance:none;flex:1;height:8px;border-radius:4px;background:var(--border);outline:none}
+.pts-slider::-webkit-slider-thumb{-webkit-appearance:none;width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--purple));cursor:pointer;border:3px solid #fff;box-shadow:0 2px 8px rgba(37,99,235,.3)}
+.pts-slider::-moz-range-thumb{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--purple));cursor:pointer;border:3px solid #fff}
+.pts-val{min-width:40px;text-align:center;font-size:22px;font-weight:900;color:var(--blue-dark)}
+.pts-lbl{font-size:10px;color:var(--muted);text-align:center;margin-top:4px;font-weight:600}
+
+.tc-recur{display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:700;color:var(--purple);background:var(--purple-light);padding:2px 7px;border-radius:6px;margin-top:4px}
+/* Recurrence day-picker */
+.day-chips{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px}
+.day-chip{padding:6px 10px;border-radius:9px;border:2px solid var(--border);background:var(--bg);font-size:12px;font-weight:700;cursor:pointer;color:var(--muted);transition:all .15s}
+.day-chip.sel{border-color:var(--purple);background:var(--purple-light);color:#5b21b6}display:flex;align-items:center;gap:4px;margin-top:5px;font-size:11px;font-weight:600;color:var(--muted)}
+.tc-deadline.urgent{color:#dc2626;animation:urgpulse 1.5s ease infinite}
+.tc-deadline.soon{color:#ea580c}
+.tc-deadline.nd{color:#94a3b8;font-weight:400;font-size:10px;opacity:.7}
+
+/* Task pulse animations */
+.pulse-done{animation:pulseDone .5s ease}
+.pulse-assign{animation:pulseAssign .4s ease}
+.pulse-undo{animation:pulseUndo .3s ease}
+@keyframes pulseDone{0%{transform:scale(1)}30%{transform:scale(1.04);box-shadow:0 0 20px rgba(34,197,94,.4)}100%{transform:scale(1)}}
+@keyframes pulseAssign{0%{transform:scale(1)}30%{transform:scale(1.02);box-shadow:0 0 14px rgba(37,99,235,.3)}100%{transform:scale(1)}}
+@keyframes pulseUndo{0%{transform:scale(1)}40%{transform:scale(.97);opacity:.7}100%{transform:scale(1);opacity:1}}
+@keyframes urgpulse{0%,100%{opacity:1}50%{opacity:.5}}
+.tcard.overdue{border-color:#fca5a5!important;background:#fef2f2!important}
+.tcard.overdue .tc-deadline{color:#dc2626;font-weight:800}
+.dl-row{display:flex;gap:8px;align-items:center}
+.dl-row select,.dl-row input{flex:1;padding:9px 10px;border-radius:10px;border:2px solid var(--border);background:var(--bg);font-family:'Heebo',sans-serif;font-size:13px;color:var(--text);outline:none}
+.dl-row select:focus,.dl-row input:focus{border-color:var(--blue)}
+.dl-clear{padding:9px 12px;border-radius:10px;border:1.5px solid var(--border);background:var(--bg);font-size:14px;cursor:pointer}
+
+/* Confirm */
+.confirm-ov{position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:600;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.confirm-ov.open{display:flex}
+.confirm-box{background:var(--surface);border-radius:18px;padding:24px 20px;width:85%;max-width:340px;text-align:center;animation:su .25s cubic-bezier(.32,1.18,.6,1)}
+.confirm-box h3{font-size:18px;font-weight:800;color:var(--blue-dark);margin-bottom:6px}
+.confirm-box p{font-size:13px;color:var(--muted);margin-bottom:18px;line-height:1.5}
+.confirm-acts{display:flex;gap:8px}
+.confirm-acts button{flex:1;padding:12px;border-radius:12px;font-family:'Heebo',sans-serif;font-size:14px;font-weight:700;cursor:pointer}
+.cbtn-no{border:1.5px solid var(--border);background:var(--bg);color:var(--muted)}
+.cbtn-yes{border:none;background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff}
+
+/* Emoji picker for member */
+.em-pick-grid{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+.em-pick-grid span{font-size:28px;padding:6px;border-radius:10px;cursor:pointer;border:2px solid transparent;transition:all .12s}
+.em-pick-grid span:active,.em-pick-grid span.sel{background:var(--blue-light);border-color:var(--blue)}
+
+/* Share */
+.share-btn{width:100%;padding:13px;border-radius:13px;border:none;background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;font-family:'Heebo',sans-serif;font-size:15px;font-weight:900;cursor:pointer;box-shadow:0 3px 14px rgba(34,197,94,.25);margin-bottom:8px}
+.share-row{display:flex;gap:7px;margin-bottom:8px}
+.share-opt{flex:1;padding:12px 6px;border-radius:12px;border:1.5px solid var(--border);background:var(--bg);font-family:'Heebo',sans-serif;font-size:12px;font-weight:700;cursor:pointer;text-align:center}
+.share-opt:active{background:var(--blue-light)}
+.share-opt .sh-ico{font-size:20px;display:block;margin-bottom:3px}
+
+/* Toast */
+.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.8);color:#fff;padding:10px 20px;border-radius:10px;font-size:13px;font-weight:700;z-index:9999;opacity:0;transition:opacity .3s;pointer-events:none}
+.toast.show{opacity:1}
+
+/* Print */
+@media print{
+  body{max-width:100%!important;overflow:visible!important;background:#fff!important}
+  .screen,.bot,.ov,.topbar,.hfly,.toast,.confirm-ov{display:none!important}
+  #print-area{display:block!important;padding:20px;font-family:'Heebo',sans-serif;direction:rtl}
+  #print-area h1{font-size:22px;font-weight:900;color:#1e40af;text-align:center;margin-bottom:14px}
+  #print-area .pr-kid{margin-bottom:16px;page-break-inside:avoid}
+  #print-area .pr-kid h2{font-size:16px;font-weight:800;border-bottom:2px solid #dbeafe;padding-bottom:4px;margin-bottom:8px}
+  #print-area .pr-task{display:flex;align-items:center;gap:8px;padding:6px 10px;border-bottom:1px solid #e2e8f0;font-size:13px}
+  #print-area .pr-task .em{font-size:16px}
+  #print-area .pr-task .tnm{flex:1;font-weight:600}
+  #print-area .pr-task .chk{font-size:16px}
+}
+#print-area{display:none}
+
+::-webkit-scrollbar{width:3px}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+</style>
+</head>
+<body>
+<div id="print-area"></div>
+
+<!-- SETUP -->
+<div class="screen active" id="s-setup">
+  <div class="hero">
+    <span class="hrt">🏠</span>
+    <h1>FamilyTasks</h1>
+    <p>חלוקת משימות למשפחה — בכיף! 🎯</p>
+  </div>
+
+  <div class="sec-label">👨‍👩‍👧‍👦 הורים</div>
+  <div class="member-list" id="parents-list"></div>
+  <button class="add-member" onclick="addMember('parent')">➕ הוסף הורה</button>
+
+  <div class="sec-label">🧒 ילדים</div>
+  <div class="member-list" id="kids-list"></div>
+  <button class="add-member" onclick="addMember('child')">➕ הוסף ילד/ה</button>
+
+  <button class="go-btn" onclick="doStart()">🚀 יאללה מתחילים!</button>
+</div>
+
+<!-- MAIN -->
+<div class="screen" id="s-main">
+  <div class="topbar">
+    <div class="tb1">
+      <div class="app-ttl">🏠 FamilyTasks</div>
+      <div class="app-date" id="hdate"></div>
+    </div>
+    <div class="theme-bar" id="theme-bar"></div>
+    <div class="kids-bar" id="kids-bar"></div>
+  </div>
+  <div class="tlist" id="tlist"></div>
+  <div class="bot">
+    <button class="icobtn" onclick="openSettings()">⚙️</button>
+    <button class="icobtn" onclick="openHistory()">📅</button>
+    <button class="bonus-btn" onclick="openBonus()">🎁</button>
+    <button class="sumbtn" onclick="openSum()">🎉 סיכום</button>
+    <button class="icobtn" onclick="openSendMenu()">📩</button>
+    <button class="icobtn" onclick="openPushSettings()">🔔</button>
+    <button class="icobtn" onclick="confirmReset()">🔄</button>
+  </div>
+</div>
+
+<!-- SUMMARY -->
+<div class="ov" id="ov-sum" onclick="closeOv(event,'ov-sum')">
+  <div class="sheet">
+    <div class="handle"></div>
+    <div class="sum-ttl" id="sum-ttl">סיכום היום 🎊</div>
+    <div class="sum-dt" id="sum-dt"></div>
+    <div id="sum-cards"></div>
+    <div class="tipcard" id="tipcard"></div>
+    <button class="close-btn" onclick="closeOv(null,'ov-sum');setTimeout(openBonus,350)" style="background:linear-gradient(135deg,#fbbf24,#f59e0b);box-shadow:0 3px 14px rgba(245,158,11,.3);margin-bottom:6px">🎁 בונוס!</button>
+    <button class="share-btn" onclick="shareSummary()">📤 שתף</button>
+    <div class="share-row" id="share-row" style="display:none">
+      <button class="share-opt" onclick="shareVia('whatsapp')"><span class="sh-ico">💬</span>WhatsApp</button>
+      <button class="share-opt" onclick="shareVia('copy')"><span class="sh-ico">📋</span>העתק</button>
+      <button class="share-opt" onclick="shareVia('native')"><span class="sh-ico">📱</span>שיתוף</button>
+    </div>
+    <button class="close-btn" onclick="doRematch()" style="background:linear-gradient(135deg,#f59e0b,#d97706);margin-bottom:6px">🔄 מקצה שיפורים!</button>
+    <button class="close-btn" onclick="closeOv(null,'ov-sum')">💪 ליום מחר!</button>
+  </div>
+</div>
+
+<!-- ADD/EDIT TASK -->
+<div class="ov" id="ov-task" onclick="closeOv(event,'ov-task')">
+  <div class="sheet">
+    <div class="handle"></div>
+    <div class="mod-ttl" id="task-ov-ttl">➕ משימה חדשה</div>
+    <input type="hidden" id="teditId">
+    <div class="fg">
+      <label class="fl">שם המשימה</label>
+      <input class="fi" id="tnm" placeholder='לדוגמה: "לסדר את החדר"' maxlength="40">
+    </div>
+    <div class="fg tm-section">
+      <label class="fl">👤 למי המשימה?</label>
+      <div id="task-members" class="task-members-grid"></div>
+      <div class="tm-actions">
+        <span class="tm-all-btn" onclick="selectAllMembers()">✅ כולם</span>
+        <span class="tm-all-btn" onclick="renderTaskMembers([])">✕ נקה</span>
+      </div>
+    </div>
+    <div class="fg">
+      <label class="fl">אמוג׳י</label>
+      <div class="emw" id="tempick"></div>
+    </div>
+    <div class="fg">
+      <label class="fl">ניקוד</label>
+      <div class="pts-slider-wrap">
+        <span class="pts-val" id="tpts-val">10</span>
+        <input type="range" class="pts-slider" id="tpts" min="1" max="50" value="10" oninput="document.getElementById('tpts-val').textContent=this.value">
+      </div>
+      <div class="pts-lbl">1 = קל &nbsp;·&nbsp; 50 = משימת-על</div>
+    </div>
+    <div class="fg">
+      <label class="fl">⏰ דדליין (אופציונלי)</label>
+      <div class="dl-row">
+        <select id="tdl-type" onchange="toggleDlInput()">
+          <option value="">ללא דדליין</option>
+          <option value="time">שעה ספציפית</option>
+          <option value="mins">בעוד X דקות</option>
+        </select>
+        <input type="time" id="tdl-time" style="display:none">
+        <input type="number" id="tdl-mins" placeholder="דקות" min="5" max="480" style="display:none">
+        <button class="dl-clear" onclick="clearDeadline()" title="נקה">✕</button>
+      </div>
+    </div>
+    <div class="fg">
+      <label class="fl">🔁 חזרתיות</label>
+      <select id="trecur-type" class="fi" onchange="toggleRecurInput()">
+        <option value="">ללא חזרה</option>
+        <option value="daily">כל יום</option>
+        <option value="weekly">כל שבוע (אותו יום)</option>
+        <option value="days">ימים ספציפיים</option>
+      </select>
+      <div id="trecur-days" style="display:none">
+        <div class="day-chips">
+          <span class="day-chip" data-d="0" onclick="toggleDayChip(this)">א׳</span>
+          <span class="day-chip" data-d="1" onclick="toggleDayChip(this)">ב׳</span>
+          <span class="day-chip" data-d="2" onclick="toggleDayChip(this)">ג׳</span>
+          <span class="day-chip" data-d="3" onclick="toggleDayChip(this)">ד׳</span>
+          <span class="day-chip" data-d="4" onclick="toggleDayChip(this)">ה׳</span>
+          <span class="day-chip" data-d="5" onclick="toggleDayChip(this)">ו׳</span>
+          <span class="day-chip" data-d="6" onclick="toggleDayChip(this)">שבת</span>
+        </div>
+      </div>
+    </div>
+    <div class="macts">
+      <button class="bcl" onclick="closeOv(null,'ov-task')">ביטול</button>
+      <button class="bsv" onclick="saveTask()">✓ שמור</button>
+    </div>
+    <button class="del-btn" id="tdel-btn" style="display:none" onclick="confirmDelTask()">🗑️ מחק משימה</button>
+  </div>
+</div>
+
+<!-- BONUS -->
+<div class="ov" id="ov-bonus" onclick="closeOv(event,'ov-bonus')">
+  <div class="sheet" style="text-align:center">
+    <div class="handle"></div>
+    <div style="font-size:56px;margin:8px 0" id="bon-emo">🎁</div>
+    <div style="font-size:17px;font-weight:700;color:var(--blue-dark);margin:8px 0;line-height:1.5" id="bon-msg"></div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:14px">בחרו למי לתת בונוס:</div>
+    <div id="bon-kids" style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:14px"></div>
+    <div style="font-size:13px;color:var(--muted);font-weight:700;margin-bottom:14px">נקודות בונוס: <span style="font-size:24px;font-weight:900;color:var(--blue-dark);display:block;margin-top:4px" id="bon-pts-val"></span></div>
+    <div class="macts">
+      <button class="bcl" onclick="closeOv(null,'ov-bonus')">ביטול</button>
+      <button class="bsv" onclick="giveBonus()">🎁 תן בונוס!</button>
+    </div>
+  </div>
+</div>
+
+<!-- SEND MENU -->
+<div class="ov" id="ov-send" onclick="closeOv(event,'ov-send')">
+  <div class="sheet" style="text-align:center">
+    <div class="handle"></div>
+    <div class="mod-ttl">📩 שלח את דף המשימות</div>
+    <button class="share-btn" onclick="sendSMS()" style="margin-bottom:8px">💬 שלח ב-SMS</button>
+    <button class="share-btn" onclick="sendPDF()" style="background:linear-gradient(135deg,#7c3aed,#6d28d9);margin-bottom:8px">📄 שמור כ-PDF</button>
+    <button class="share-btn" onclick="sendWhatsApp()" style="margin-bottom:8px">💬 שלח בוואטסאפ</button>
+    <button class="bcl" onclick="closeOv(null,'ov-send')" style="width:100%">ביטול</button>
+  </div>
+</div>
+
+<!-- CONFIRM RESET -->
+<div class="confirm-ov" id="ov-confirm" onclick="closeConfirm(event)">
+  <div class="confirm-box">
+    <h3>🔄 איפוס יומי</h3>
+    <p>לאפס את כל המשימות של היום?</p>
+    <div class="confirm-acts">
+      <button class="cbtn-no" onclick="closeConfirm()">ביטול</button>
+      <button class="cbtn-yes" onclick="doReset()">כן, אפס!</button>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIRM DELETE -->
+<div class="confirm-ov" id="ov-del" onclick="closeDelConfirm(event)">
+  <div class="confirm-box">
+    <h3>🗑️ מחיקת משימה</h3>
+    <p id="del-msg">למחוק?</p>
+    <div class="confirm-acts">
+      <button class="cbtn-no" onclick="closeDelConfirm()">ביטול</button>
+      <button class="cbtn-yes" onclick="doDelTask()">כן, מחק!</button>
+    </div>
+  </div>
+</div>
+
+<!-- MEMBER EMOJI PICKER -->
+<div class="ov" id="ov-empick" onclick="closeOv(event,'ov-empick')">
+  <div class="sheet" style="text-align:center">
+    <div class="handle"></div>
+    <div class="mod-ttl">בחר אמוג׳י או תמונה</div>
+    <div class="em-pick-grid" id="mem-em-grid"></div>
+    <div class="photo-btn" onclick="triggerPhotoPick()">📷 בחר תמונה מהגלריה</div>
+  </div>
+</div>
+
+<!-- HISTORY -->
+<div class="ov" id="ov-hist" onclick="closeOv(event,'ov-hist')">
+  <div class="sheet" style="max-height:92vh">
+    <div class="handle"></div>
+    <div class="mod-ttl">📅 היסטוריה</div>
+    <div style="display:flex;gap:6px;margin-bottom:12px">
+      <button class="tm-all-btn" id="hv-week" onclick="setHistView('week')" style="flex:1;padding:8px;font-size:13px">שבוע אחרון</button>
+      <button class="tm-all-btn" id="hv-month" onclick="setHistView('month')" style="flex:1;padding:8px;font-size:13px">חודש אחרון</button>
+    </div>
+    <div id="hist-content" style="overflow-y:auto;max-height:60vh"></div>
+    <button class="bcl" onclick="closeOv(null,'ov-hist')" style="width:100%;margin-top:10px">סגור</button>
+  </div>
+</div>
+
+<!-- PUSH NOTIFICATIONS -->
+<div class="ov" id="ov-push" onclick="closeOv(event,'ov-push')">
+  <div class="sheet">
+    <div class="handle"></div>
+    <div class="mod-ttl">🔔 תזכורות</div>
+    <div id="push-status" style="font-size:13px;color:var(--muted);margin-bottom:12px;padding:10px;background:var(--bg);border-radius:10px;text-align:center"></div>
+    <div style="font-size:12px;font-weight:700;color:var(--muted);letter-spacing:.6px;text-transform:uppercase;margin-bottom:8px">תזכורת יומית</div>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+      <input type="time" id="push-time" class="fi" style="flex:1" value="08:00">
+      <button class="bsv" style="flex:none;padding:10px 16px" onclick="savePushTime()">שמור</button>
+    </div>
+    <div style="font-size:12px;font-weight:700;color:var(--muted);letter-spacing:.6px;text-transform:uppercase;margin-bottom:8px">תזכורת לפני דדליין</div>
+    <select id="push-before" class="fi" style="margin-bottom:14px">
+      <option value="">ללא</option>
+      <option value="15">15 דקות לפני</option>
+      <option value="30">30 דקות לפני</option>
+      <option value="60">שעה לפני</option>
+    </select>
+    <button class="bsv" style="width:100%" onclick="requestPushPermission()">🔔 הפעל התראות</button>
+    <button class="bcl" onclick="closeOv(null,'ov-push')" style="width:100%;margin-top:8px">סגור</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<input type="file" id="photo-input" accept="image/*" style="display:none" onchange="handlePhotoUpload(this)">
+
+<script>
+/* ══ SOUND ENGINE ══ */
+let audioCtx=null;
+function getCtx(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();return audioCtx;}
+function playTone(freq,dur,type,vol){
+  try{const ctx=getCtx();const o=ctx.createOscillator();const g=ctx.createGain();
+  o.type=type||'sine';o.frequency.setValueAtTime(freq,ctx.currentTime);
+  g.gain.setValueAtTime(vol||0.15,ctx.currentTime);g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+dur);
+  o.connect(g);g.connect(ctx.destination);o.start();o.stop(ctx.currentTime+dur);}catch(e){}
+}
+function sfxDone(){playTone(523,.12,'sine',.18);setTimeout(()=>playTone(659,.12,'sine',.16),80);setTimeout(()=>playTone(784,.22,'sine',.2),160);setTimeout(()=>playTone(1047,.3,'sine',.12),260);}
+function sfxAssign(){playTone(350,.08,'triangle',.1);setTimeout(()=>playTone(440,.08,'triangle',.12),60);setTimeout(()=>playTone(523,.12,'triangle',.14),120);}
+function sfxBonus(){[523,659,784,1047].forEach((f,i)=>setTimeout(()=>playTone(f,.18,'sine',.14),i*90));}
+function sfxSummary(){[523,523,659,784,659,784,1047].forEach((f,i)=>setTimeout(()=>playTone(f,.15,'square',.08),i*110));}
+function sfxStart(){[392,440,523,659,784].forEach((f,i)=>setTimeout(()=>playTone(f,.14,'sine',.15),i*100));}
+function sfxReset(){playTone(600,.15,'sawtooth',.08);setTimeout(()=>playTone(400,.15,'sawtooth',.06),100);setTimeout(()=>playTone(250,.2,'sawtooth',.04),200);}
+function sfxRematch(){[330,392,440,523,587,659].forEach((f,i)=>setTimeout(()=>playTone(f,.1,'square',.07),i*60));}
+function sfxClick(){playTone(440,.06,'sine',.08);}
+
+/* ══ DATA ══ */
+const STORE='ftasks3';
+const PARENT_EMOJIS=['👨','👩','👴','👵','🧔','👱‍♀️','👨‍🦱','👩‍🦰','🧑','👤'];
+const KID_EMOJIS=['👦','👧','🧒','👶','🧒🏻','👦🏽','👧🏼','🧒🏾','👦🏻','👧🏽'];
+const TASK_EMOJIS=['🏠','🍽️','🧹','🛒','🐕','📚','🚗','💰','🌱','📦','🔧','🎯','🧺','🫧','🛏️','🗑️','🎮','🖥️'];
+const HD=['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'];
+const HM=['ינואר','פברואר','מרץ','אפריל','מאי','יוני','יולי','אוגוסט','ספטמבר','אוקטובר','נובמבר','דצמבר'];
+
+function todayAt(h,m){var d=new Date();d.setHours(h,m,0,0);return d.toISOString();}
+const DEFS=[
+  {id:1,name:'לסדר את החדר',emoji:'🛏️',pts:10,deadline:todayAt(9,0)},
+  {id:2,name:'לשטוף כלים',emoji:'🍽️',pts:10,deadline:todayAt(13,0)},
+  {id:3,name:'להוציא את הפח',emoji:'🗑️',pts:8},
+  {id:4,name:'לעשות שיעורי בית',emoji:'📚',pts:15,deadline:todayAt(18,0)},
+  {id:5,name:'לטאטא / לשאוב',emoji:'🧹',pts:12},
+  {id:6,name:'לקפל כביסה',emoji:'🧺',pts:12,deadline:todayAt(19,0)},
+  {id:7,name:'לסדר את הסלון',emoji:'🛋️',pts:8},
+  {id:8,name:'להכין ארוחה',emoji:'👨‍🍳',pts:20,deadline:todayAt(12,30)},
+  {id:9,name:'לטפל בחיות',emoji:'🐕',pts:10,deadline:todayAt(8,0)},
+  {id:10,name:'להתקלח',emoji:'🚿',pts:5,deadline:todayAt(21,0)},
+  {id:11,name:'קניות בסופר',emoji:'🛒',pts:15,deadline:todayAt(17,0)},
+  {id:12,name:'לשלם חשבונות',emoji:'💰',pts:12},
+  {id:13,name:'לתקן דברים בבית',emoji:'🔧',pts:15},
+  {id:14,name:'נסיעה / הסעות',emoji:'🚗',pts:10},
+  {id:15,name:'לטפל בגינה',emoji:'🌱',pts:12},
+];
+const TIPS=[
+  '⭐ מי שמסיים את כל המשימות מקבל כוכב זהב!',
+  '💪 עבודת צוות — כשהמשפחה עובדת ביחד הכל קל יותר!',
+  '🎯 טיפ: התחילו מהמשימה הקשה — אחר כך הכל קל!',
+  '🌟 כל משימה שעושים בחיוך שווה כפול!',
+  '🤝 עזרה אחד לשני = בונוס אוטומטי!',
+  '🏆 שיא המשפחה: מי יגיע הכי הרבה נקודות?',
+  '👨‍👩‍👧‍👦 גם הורים משחקים! דוגמה אישית שווה הכל!',
+  '🔥 תחרות משפחתית — מי מוביל/ה היום?',
+];
+const BON_MSGS=[
+  {emoji:'⭐',msg:'כל הכבוד! התנהגות מעולה!',pts:15},
+  {emoji:'🏆',msg:'אלופ/ה! מגיע לך פרס!',pts:20},
+  {emoji:'🍫',msg:'מגיע לך שוקולד!',pts:10},
+  {emoji:'🎮',msg:'בונוס: 15 דקות משחק!',pts:15},
+  {emoji:'👑',msg:'מלך/מלכת הבית היום!',pts:20},
+  {emoji:'🌟',msg:'כוכב/ת השבוע!',pts:25},
+  {emoji:'🎉',msg:'חוגגים אותך!',pts:20},
+  {emoji:'💎',msg:'יהלום! הפתעת את כולם!',pts:25},
+];
+
+const TASK_FX={
+  '🛏️':['🛏️','✨','⭐','🌙','💫'],
+  '🍽️':['🍽️','🍴','✨','💎','🫧'],
+  '🗑️':['🗑️','♻️','✨','💨','🌿'],
+  '📚':['📚','📖','🎓','✏️','⭐'],
+  '🧹':['🧹','✨','💫','🧼','💎'],
+  '🧺':['🧺','👕','👗','✨','🌸'],
+  '🛋️':['🛋️','✨','🏠','💫','🪴'],
+  '👨‍🍳':['👨‍🍳','🍳','🥘','😋','🔥'],
+  '🐕':['🐕','🦴','🐾','❤️','⭐'],
+  '🚿':['🚿','💧','🫧','✨','🌊'],
+  '🛒':['🛒','🥑','🧃','🍎','💰'],
+  '💰':['💰','💵','💳','✅','📋'],
+  '🔧':['🔧','🔨','⚡','✨','💪'],
+  '🚗':['🚗','🛞','💨','🏎️','✨'],
+  '🌱':['🌱','🌻','🌿','☀️','💧'],
+};
+
+let S={
+  members:[
+    {id:1,name:'אבא',emoji:'👨',role:'parent'},
+    {id:2,name:'אמא',emoji:'👩',role:'parent'},
+    {id:3,name:'ילד/ה 1',emoji:'👦',role:'child'},
+    {id:4,name:'ילד/ה 2',emoji:'👧',role:'child'},
+    {id:5,name:'ילד/ה 3',emoji:'🧒',role:'child'},
+  ],
+  tasks:JSON.parse(JSON.stringify(DEFS)),
+  nid:20,mid:10,
+  logs:{}
+};
+const sv=()=>localStorage.setItem(STORE,JSON.stringify(S));
+function ld(){try{const d=localStorage.getItem(STORE);if(d){S={...S,...JSON.parse(d)};return true;}}catch(e){}return false;}
+const allM=()=>S.members;
+function patchDeadlines(){
+  var defMap={};DEFS.forEach(function(d){defMap[d.id]=d;});
+  S.tasks.forEach(function(t){
+    if(!t.deadline&&defMap[t.id]&&defMap[t.id].deadline){t.deadline=defMap[t.id].deadline;}
+  });
+  // add new default tasks that don't exist yet
+  var existIds={};S.tasks.forEach(function(t){existIds[t.id]=true;});
+  DEFS.forEach(function(d){
+    if(!existIds[d.id])S.tasks.push(JSON.parse(JSON.stringify(d)));
+  });
+  if(S.nid<20)S.nid=20;
+}
+const today=()=>new Date().toISOString().slice(0,10);
+function glog(k){if(!S.logs[k])S.logs[k]={};return S.logs[k];}
+const tlog=()=>glog(today());
+const kids=()=>S.members.filter(m=>m.role==='child');
+const parents=()=>S.members.filter(m=>m.role==='parent');
+
+/* ══ SETUP ══ */
+function renderSetup(){
+  const pl=document.getElementById('parents-list');
+  const kl=document.getElementById('kids-list');
+  pl.innerHTML=parents().map(m=>`
+    <div class="member-row parent">
+      <span onclick="pickMemberEmoji(${m.id})" style="cursor:pointer">${m.photo?'<img src="'+m.photo+'" class="m-avatar">':'<span class="m-emoji">'+m.emoji+'</span>'}</span>
+      <input value="${m.name}" placeholder="שם ההורה" maxlength="15" onchange="updMember(${m.id},this.value)">
+      <span class="m-role">הורה</span>
+      ${parents().length>1?`<button class="m-del" onclick="delMember(${m.id})">✕</button>`:''}
+    </div>`).join('');
+  kl.innerHTML=kids().map(m=>`
+    <div class="member-row child">
+      <span onclick="pickMemberEmoji(${m.id})" style="cursor:pointer">${m.photo?'<img src="'+m.photo+'" class="m-avatar">':'<span class="m-emoji">'+m.emoji+'</span>'}</span>
+      <input value="${m.name}" placeholder="שם הילד/ה" maxlength="15" onchange="updMember(${m.id},this.value)">
+      <span class="m-role">ילד/ה</span>
+      ${kids().length>1?`<button class="m-del" onclick="delMember(${m.id})">✕</button>`:''}
+    </div>`).join('');
+}
+
+function updMember(id,val){const m=S.members.find(x=>x.id===id);if(m)m.name=val.trim();sv();}
+function addMember(role){
+  const emojis=role==='parent'?PARENT_EMOJIS:KID_EMOJIS;
+  const count=S.members.filter(m=>m.role===role).length;
+  S.members.push({id:S.mid++,name:role==='parent'?'הורה '+(count+1):'ילד/ה '+(count+1),emoji:emojis[count%emojis.length],role});
+  sv();renderSetup();
+}
+function delMember(id){S.members=S.members.filter(m=>m.id!==id);sv();renderSetup();}
+
+let pickingMemberId=null;
+function pickMemberEmoji(id){
+  pickingMemberId=id;
+  const m=S.members.find(x=>x.id===id);
+  const list=m.role==='parent'?PARENT_EMOJIS:KID_EMOJIS;
+  document.getElementById('mem-em-grid').innerHTML=list.map(e=>
+    `<span class="${e===m.emoji?'sel':''}" onclick="setMemberEmoji('${e}')">${e}</span>`
+  ).join('');
+  document.getElementById('ov-empick').classList.add('open');
+}
+function setMemberEmoji(e){
+  const m=S.members.find(x=>x.id===pickingMemberId);
+  if(m){m.emoji=e;delete m.photo;}
+  sv();renderSetup();closeOv(null,'ov-empick');
+}
+function triggerPhotoPick(){document.getElementById('photo-input').click();}
+function handlePhotoUpload(inp){
+  var file=inp.files&&inp.files[0];if(!file)return;
+  var reader=new FileReader();
+  reader.onload=function(ev){
+    var img=new Image();
+    img.onload=function(){
+      var c=document.createElement('canvas');
+      var sz=80;c.width=sz;c.height=sz;
+      var ctx=c.getContext('2d');
+      var s=Math.min(img.width,img.height);
+      var sx=(img.width-s)/2,sy=(img.height-s)/2;
+      ctx.drawImage(img,sx,sy,s,s,0,0,sz,sz);
+      var data=c.toDataURL('image/jpeg',0.7);
+      var m=S.members.find(function(x){return x.id===pickingMemberId;});
+      if(m){m.photo=data;}
+      sv();renderSetup();renderKidsBar();renderTasks();closeOv(null,'ov-empick');
+    };
+    img.src=ev.target.result;
+  };
+  reader.readAsDataURL(file);
+  inp.value='';
+}
+function mav(m,cls){
+  if(m.photo)return '<img src="'+m.photo+'" class="'+cls+'">';
+  return '<span class="'+cls.replace('avatar','emoji')+'">'+m.emoji+'</span>';
+}
+
+function doStart(){
+  // update names from inputs
+  document.querySelectorAll('#parents-list .member-row input').forEach((inp,i)=>{const p=parents();if(p[i])p[i].name=inp.value.trim()||p[i].name;});
+  document.querySelectorAll('#kids-list .member-row input').forEach((inp,i)=>{const k=kids();if(k[i])k[i].name=inp.value.trim()||k[i].name;});
+  sv();bootMain();showScreen('main');
+  sfxStart();renderThemeBar();
+  spawn(14,innerWidth/2,innerHeight*.6);
+}
+
+/* ══ BOOT ══ */
+function bootMain(){
+  const now=new Date();
+  document.getElementById('hdate').textContent='יום '+HD[now.getDay()]+', '+now.getDate()+' '+HM[now.getMonth()];
+  renderKidsBar();renderTasks();renderThemeBar();
+}
+
+let filterKid=null;
+function renderKidsBar(){
+  var mm=allM();
+  document.getElementById('kids-bar').innerHTML=
+    `<div class="kid-chip kid-chip-all ${filterKid===null?'sel':''}" onclick="setFilter(null)">
+      <span class="kc-em">👨‍👩‍👧‍👦</span><span class="kc-nm">כולם</span>
+    </div>`+
+    mm.map(function(k){
+      var log=tlog();
+      var pts=0;S.tasks.forEach(function(t){if(log['done_'+k.id+'_'+t.id])pts+=t.pts;});
+      if(log._bonus&&log._bonus[k.id])pts+=log._bonus[k.id];
+      return'<div class="kid-chip '+(k.role==='parent'?'parent-chip ':'')+''+(filterKid===k.id?'sel':'')+'" onclick="setFilter('+k.id+')">'
+        +(k.photo?'<img src="'+k.photo+'" class="kc-avatar">':'<span class="kc-em">'+k.emoji+'</span>')
+        +'<span class="kc-nm">'+k.name+'</span>'
+        +'<span class="kc-pt">'+pts+'</span>'
+        +'</div>';
+    }).join('');
+}
+
+function setFilter(kid){filterKid=kid;renderKidsBar();renderTasks();sfxClick();}
+
+/* ══ TASKS ══ */
+function renderTasks(){
+  const log=tlog();const kk=allM();
+  document.getElementById('tlist').innerHTML=
+    S.tasks.map(t=>{
+      const taskMembers=kk.filter(k=>log['done_'+k.id+'_'+t.id]||log['assign_'+k.id+'_'+t.id]);
+      const allDone=taskMembers.length>0&&taskMembers.every(k=>log['done_'+k.id+'_'+t.id]);
+      // filter
+      if(filterKid!==null){
+        const assigned=log['assign_'+filterKid+'_'+t.id];
+        const done=log['done_'+filterKid+'_'+t.id];
+        if(!assigned&&!done)return '';
+      }
+      const dlInfo=getDeadlineInfo(t);
+      const dlClass=allDone?'done':dlInfo.overdue?'overdue':'';
+      return`<div class="tcard ${dlClass}" id="r${t.id}">
+        <div class="tc-top">
+          <span class="tc-em">${t.emoji}</span>
+          <div class="tc-info">
+            <div class="tc-nm">${t.name}</div>
+            <div class="tc-pts">${t.pts} נקודות</div>
+            ${dlInfo.text?`<div class="tc-deadline ${dlInfo.cls}">${dlInfo.text}</div>`:`<div class="tc-deadline nd">🕐 ללא דדליין</div>`}
+            ${t.recur?`<div class="tc-recur">🔁 ${recurLabel(t.recur,t.recurDays)}</div>`:''}
+          </div>
+          <button class="tc-edit" onclick="openEditTask(${t.id})">✏️</button>
+        </div>
+        <div class="tc-assign">
+          ${kk.filter(k=>log['done_'+k.id+'_'+t.id]||log['assign_'+k.id+'_'+t.id]).map(k=>{
+            const done=log['done_'+k.id+'_'+t.id];
+            return`<div class="assign-chip ${done?'completed':'assigned'}" onclick="toggleTask(${k.id},${t.id})">
+              ${k.photo?'<img src="'+k.photo+'" class="ac-avatar">':'<span class="ac-em">'+k.emoji+'</span>'}
+              ${done?'✅':'📋'}
+              <span>${k.name}</span>
+            </div>`;
+          }).join('')}
+          
+        </div>
+      </div>`;
+    }).join('')+
+    `<button class="add-task-btn" onclick="openAddTask()">➕ הוסף משימה</button>`;
+}
+
+function toggleTask(kidId,taskId){
+  const log=tlog();
+  const dk='done_'+kidId+'_'+taskId;
+  const ak='assign_'+kidId+'_'+taskId;
+  const r=document.getElementById('r'+taskId);
+  const t=S.tasks.find(function(x){return x.id===taskId;});
+  var bx=null;if(r)bx=r.getBoundingClientRect();
+  if(log[dk]){
+    // done → remove
+    delete log[dk];delete log[ak];sfxClick();
+    if(bx)pulseCard(r,'undo');
+  } else if(log[ak]){
+    // assigned → done ✅
+    log[dk]=true;sfxDone();
+    if(bx){
+      var emojis=getTaskEmojis(t?t.emoji:'⭐').concat(['❤️','💪','🎉']);
+      spawn(16,bx.left+bx.width/2,bx.top+30,emojis);
+      pulseCard(r,'done');
+    }
+    // check if ALL assigned members finished this task
+    var kk=allM().filter(function(k){return log['done_'+k.id+'_'+taskId]||log['assign_'+k.id+'_'+taskId];});
+    var allDone=kk.length>1&&kk.every(function(k){return log['done_'+k.id+'_'+taskId];});
+    if(allDone){
+      setTimeout(function(){
+        sfxBonus();
+        spawn(24,innerWidth/2,innerHeight*.4,['🎉','🏆','⭐','🌟','✨','💎','👑','🥇','💪','🎊','❤️','🔥']);
+        showToast('🏆 כולם סיימו! כל הכבוד למשפחה!');
+      },400);
+    }
+  } else {
+    // none → assigned 📋
+    log[ak]=true;sfxAssign();
+    if(bx){spawn(6,bx.left+bx.width/2,bx.top+30,['📋','✏️','👆','💫']);pulseCard(r,'assign');}
+  }
+  sv();renderTasks();renderKidsBar();
+}
+function pulseCard(el,type){
+  var cls='pulse-'+type;el.classList.add(cls);
+  setTimeout(function(){el.classList.remove(cls);},600);
+}
+
+function getTaskEmojis(emoji){const base=TASK_FX[emoji]||[emoji,'✨','⭐','💫','✅','🎉'];return[...base,'⭐','🌟','💪'];}
+
+/* ══ RECURRENCE ══ */
+function recurLabel(type,days){
+  if(type==='daily')return'כל יום';
+  if(type==='weekly')return'כל שבוע';
+  if(type==='days'&&days&&days.length){
+    const DN=['א׳','ב׳','ג׳','ד׳','ה׳','ו׳','שבת'];
+    return days.map(d=>DN[d]).join(' ');
+  }
+  return'חוזר';
+}
+function toggleRecurInput(){
+  const v=document.getElementById('trecur-type').value;
+  document.getElementById('trecur-days').style.display=v==='days'?'block':'none';
+}
+function toggleDayChip(el){el.classList.toggle('sel');}
+function getRecurFromForm(){
+  const type=document.getElementById('trecur-type').value;
+  if(!type)return{recur:null,recurDays:null};
+  if(type==='days'){
+    const days=[...document.querySelectorAll('#trecur-days .day-chip.sel')].map(el=>parseInt(el.dataset.d));
+    return{recur:'days',recurDays:days.length?days:null};
+  }
+  return{recur:type,recurDays:null};
+}
+function clearRecur(){
+  document.getElementById('trecur-type').value='';
+  document.getElementById('trecur-days').style.display='none';
+  document.querySelectorAll('#trecur-days .day-chip').forEach(c=>c.classList.remove('sel'));
+}
+function loadRecurToForm(t){
+  clearRecur();
+  if(!t.recur)return;
+  document.getElementById('trecur-type').value=t.recur;
+  if(t.recur==='days'){
+    document.getElementById('trecur-days').style.display='block';
+    if(t.recurDays)t.recurDays.forEach(d=>{
+      const el=document.querySelector('#trecur-days .day-chip[data-d="'+d+'"]');
+      if(el)el.classList.add('sel');
+    });
+  }
+}
+
+// Called on each app load — refresh deadlines for recurring tasks
+function patchRecurDeadlines(){
+  const now=new Date();
+  const todayDow=now.getDay(); // 0=Sun
+  S.tasks.forEach(function(t){
+    if(!t.recur)return;
+    // get the time-of-day from the stored deadline (or default 08:00)
+    let taskH=8,taskM=0;
+    if(t.deadline){
+      const old=new Date(t.deadline);
+      taskH=old.getHours();taskM=old.getMinutes();
+    }
+    if(t.recur==='daily'){
+      const dl=new Date();dl.setHours(taskH,taskM,0,0);
+      if(dl<now)dl.setDate(dl.getDate()+1);
+      t.deadline=dl.toISOString();
+    } else if(t.recur==='weekly'){
+      // same day of week as original, or today if no old deadline
+      const targetDow=t.recurDow!=null?t.recurDow:todayDow;
+      t.recurDow=targetDow;
+      const dl=new Date();dl.setHours(taskH,taskM,0,0);
+      let diff=(targetDow-todayDow+7)%7;
+      if(diff===0&&dl<now)diff=7;
+      dl.setDate(dl.getDate()+diff);
+      t.deadline=dl.toISOString();
+    } else if(t.recur==='days'&&t.recurDays&&t.recurDays.length){
+      // find next matching day
+      let best=null;
+      for(let i=0;i<8;i++){
+        const candidate=new Date();candidate.setDate(candidate.getDate()+i);candidate.setHours(taskH,taskM,0,0);
+        if(t.recurDays.indexOf(candidate.getDay())!==-1&&candidate>now){best=candidate;break;}
+      }
+      if(best)t.deadline=best.toISOString();
+    }
+    // also reset today's log for this task so it appears fresh
+    const todayKey=today();
+    if(S.logs[todayKey]){
+      // keep done if already done today — don't re-open completed recurring tasks mid-day
+    }
+  });
+}
+
+/* ══ DEADLINES ══ */
+function getDeadlineInfo(task){
+  if(!task.deadline)return{text:'',cls:'',overdue:false};
+  const now=new Date();
+  const dl=new Date(task.deadline);
+  const diff=dl-now;
+  const mins=Math.round(diff/60000);
+  const h=Math.floor(Math.abs(mins)/60);
+  const m=Math.abs(mins)%60;
+
+  if(diff<0){
+    return{text:`⏰ עבר הזמן! (לפני ${h>0?h+' שע׳ ':''}${m} דק׳)`,cls:'urgent',overdue:true};
+  } else if(mins<=15){
+    return{text:`🔥 עוד ${mins} דקות!`,cls:'urgent',overdue:false};
+  } else if(mins<=60){
+    return{text:`⏰ עוד ${mins} דקות`,cls:'soon',overdue:false};
+  } else {
+    const timeStr=dl.getHours().toString().padStart(2,'0')+':'+dl.getMinutes().toString().padStart(2,'0');
+    return{text:`⏰ עד ${timeStr} (${h} שע׳ ${m>0?m+' דק׳':''})`,cls:'',overdue:false};
+  }
+}
+
+function toggleDlInput(){
+  const type=document.getElementById('tdl-type').value;
+  document.getElementById('tdl-time').style.display=type==='time'?'block':'none';
+  document.getElementById('tdl-mins').style.display=type==='mins'?'block':'none';
+}
+function clearDeadline(){
+  document.getElementById('tdl-type').value='';
+  document.getElementById('tdl-time').style.display='none';
+  document.getElementById('tdl-mins').style.display='none';
+  document.getElementById('tdl-time').value='';
+  document.getElementById('tdl-mins').value='';
+}
+function getDeadlineFromForm(){
+  const type=document.getElementById('tdl-type').value;
+  if(type==='time'){
+    const t=document.getElementById('tdl-time').value;
+    if(!t)return null;
+    const[h,m]=t.split(':').map(Number);
+    const dl=new Date();dl.setHours(h,m,0,0);
+    if(dl<new Date())dl.setDate(dl.getDate()+1); // tomorrow if past
+    return dl.toISOString();
+  } else if(type==='mins'){
+    const m=parseInt(document.getElementById('tdl-mins').value);
+    if(!m||m<1)return null;
+    return new Date(Date.now()+m*60000).toISOString();
+  }
+  return null;
+}
+
+// Auto-refresh deadlines every minute
+setInterval(()=>{if(document.getElementById('s-main').classList.contains('active'))renderTasks();},60000);
+
+/* ══ ADD/EDIT TASK ══ */
+let selEmo='🏠',editingTaskId=null;
+function initTaskEmos(cur){
+  selEmo=cur||'🏠';
+  document.getElementById('tempick').innerHTML=TASK_EMOJIS.map(e=>
+    `<span class="emo${e===selEmo?' sel':''}" onclick="pickTaskEmo(this,'${e}')">${e}</span>`
+  ).join('');
+}
+function pickTaskEmo(el,e){document.querySelectorAll('#tempick .emo').forEach(x=>x.classList.remove('sel'));el.classList.add('sel');selEmo=e;}
+
+var taskSelectedMembers=[];
+function renderTaskMembers(selectedIds){
+  taskSelectedMembers=selectedIds||[];
+  var mm=allM();
+  document.getElementById('task-members').innerHTML=mm.map(function(m){
+    var isSel=taskSelectedMembers.indexOf(m.id)!==-1;
+    var isP=m.role==='parent';
+    return '<div class="tm-chip'+(isSel?' tm-sel':'')+(isP?' tm-parent':'')+'" onclick="toggleTaskMember('+m.id+')">'
+      +(m.photo?'<img src="'+m.photo+'" class="tm-img">':'<span class="tm-ava">'+m.emoji+'</span>')
+      +'<span>'+m.name+'</span>'
+      +(isSel?' <span style="font-size:14px">✅</span>':'')
+      +'</div>';
+  }).join('');
+}
+function toggleTaskMember(id){
+  var idx=taskSelectedMembers.indexOf(id);
+  if(idx===-1)taskSelectedMembers.push(id);
+  else taskSelectedMembers.splice(idx,1);
+  renderTaskMembers(taskSelectedMembers);
+}
+function selectAllMembers(){
+  taskSelectedMembers=allM().map(function(m){return m.id;});
+  renderTaskMembers(taskSelectedMembers);
+}
+
+function openAddTask(){
+  editingTaskId=null;
+  document.getElementById('task-ov-ttl').textContent='➕ משימה חדשה';
+  document.getElementById('tnm').value='';
+  document.getElementById('tpts').value='10';
+  document.getElementById('tpts-val').textContent='10';
+  document.getElementById('tdel-btn').style.display='none';
+  clearDeadline();clearRecur();
+  initTaskEmos();
+  renderTaskMembers([]);
+  document.getElementById('ov-task').classList.add('open');
+  setTimeout(()=>document.getElementById('tnm').focus(),340);
+}
+function openEditTask(id){
+  const t=S.tasks.find(x=>x.id===id);if(!t)return;
+  editingTaskId=id;
+  document.getElementById('task-ov-ttl').textContent='✏️ עריכת משימה';
+  document.getElementById('tnm').value=t.name;
+  document.getElementById('tpts').value=t.pts;
+  document.getElementById('tpts-val').textContent=t.pts;
+  document.getElementById('tdel-btn').style.display='block';
+  // load deadline
+  clearDeadline();
+  if(t.deadline){
+    const dl=new Date(t.deadline);
+    const now=new Date();
+    const diff=Math.round((dl-now)/60000);
+    if(diff>0&&diff<=480){
+      document.getElementById('tdl-type').value='mins';
+      document.getElementById('tdl-mins').value=diff;
+      document.getElementById('tdl-mins').style.display='block';
+    } else {
+      document.getElementById('tdl-type').value='time';
+      document.getElementById('tdl-time').value=dl.getHours().toString().padStart(2,'0')+':'+dl.getMinutes().toString().padStart(2,'0');
+      document.getElementById('tdl-time').style.display='block';
+    }
+  }
+  initTaskEmos(t.emoji);
+  loadRecurToForm(t);
+  // load assigned members
+  var log=tlog();
+  var selIds=[];
+  allM().forEach(function(m){
+    if(log['assign_'+m.id+'_'+id]||log['done_'+m.id+'_'+id])selIds.push(m.id);
+  });
+  renderTaskMembers(selIds);
+  document.getElementById('ov-task').classList.add('open');
+}
+function saveTask(){
+  const nm=document.getElementById('tnm').value.trim();
+  if(!nm){document.getElementById('tnm').focus();return;}
+  const pts=parseInt(document.getElementById('tpts').value);
+  const dl=getDeadlineFromForm();
+  const {recur,recurDays}=getRecurFromForm();
+  var tid;
+  if(editingTaskId){
+    tid=editingTaskId;
+    const t=S.tasks.find(x=>x.id===editingTaskId);
+    if(t){t.name=nm;t.emoji=selEmo;t.pts=pts;t.deadline=dl;t.recur=recur;t.recurDays=recurDays;if(recur==='weekly')t.recurDow=new Date().getDay();}
+  } else {
+    tid=S.nid++;
+    S.tasks.push({id:tid,name:nm,emoji:selEmo,pts:pts,deadline:dl,recur:recur||null,recurDays:recurDays||null,recurDow:recur==='weekly'?new Date().getDay():null});
+  }
+  // apply member assignments
+  var log=tlog();
+  allM().forEach(function(m){
+    var ak='assign_'+m.id+'_'+tid;
+    var dk='done_'+m.id+'_'+tid;
+    if(taskSelectedMembers.indexOf(m.id)!==-1){
+      // selected: assign if not already assigned or done
+      if(!log[ak]&&!log[dk])log[ak]=true;
+    } else {
+      // not selected: remove assignment (but keep if done)
+      if(log[ak]&&!log[dk])delete log[ak];
+    }
+  });
+  filterKid=null;sv();closeOv(null,'ov-task');renderTasks();renderKidsBar();
+}
+function confirmDelTask(){
+  const t=S.tasks.find(x=>x.id===editingTaskId);if(!t)return;
+  document.getElementById('del-msg').textContent='למחוק את "'+t.name+'"?';
+  document.getElementById('ov-del').classList.add('open');
+}
+function closeDelConfirm(e){if(e&&e.target!==document.getElementById('ov-del'))return;document.getElementById('ov-del').classList.remove('open');}
+function doDelTask(){S.tasks=S.tasks.filter(x=>x.id!==editingTaskId);filterKid=null;sv();closeDelConfirm();closeOv(null,'ov-task');renderTasks();renderKidsBar();}
+
+/* ══ SUMMARY ══ */
+function openSum(){
+  sfxSummary();
+  const log=tlog();const kk=allM();
+  const scores=kk.map(k=>{
+    let pts=0,done=0;
+    S.tasks.forEach(t=>{if(log['done_'+k.id+'_'+t.id]){pts+=t.pts;done++;}});
+    if(log._bonus&&log._bonus[k.id])pts+=log._bonus[k.id];
+    return{...k,pts,done};
+  }).sort((a,b)=>b.pts-a.pts);
+
+  const topPts=scores.length?scores[0].pts:0;
+  document.getElementById('sum-ttl').textContent=
+    scores.length===0?'אין חברי משפחה 😅':
+    topPts===0?'לא עשינו כלום היום 😅':
+    scores.filter(s=>s.pts===topPts).length>1?'🏆 תיקו!':
+    `🥇 ${scores[0].name} מוביל/ה!`;
+
+  const d=new Date();
+  document.getElementById('sum-dt').textContent='יום '+HD[d.getDay()]+', '+d.getDate()+' '+HM[d.getMonth()];
+
+  document.getElementById('sum-cards').innerHTML=scores.map((s,i)=>
+    `<div class="kid-sum-card ${i===0&&s.pts>0?'top':''}">
+      ${s.photo?'<img src="'+s.photo+'" class="ks-avatar">':'<span class="ks-em">'+s.emoji+'</span>'}${i===0&&s.pts>0?' 👑':''}
+      <div class="ks-info"><div class="ks-nm">${s.name}</div><div class="ks-dt">${s.done} משימות</div></div>
+      <span class="ks-pt">${s.pts}</span>
+    </div>`
+  ).join('');
+
+  const tip=TIPS[Math.floor(Math.random()*TIPS.length)];
+  document.getElementById('tipcard').innerHTML=`<div class="tip-lbl">💡 טיפ למשפחה</div><div class="tip-txt">${tip}</div>`;
+  document.getElementById('ov-sum').classList.add('open');
+  setTimeout(()=>spawn(18,innerWidth/2,innerHeight*.35),350);
+}
+
+/* ══ BONUS ══ */
+let curBon=null,bonKid=null;
+function openBonus(){
+  curBon=BON_MSGS[Math.floor(Math.random()*BON_MSGS.length)];
+  bonKid=null;
+  document.getElementById('bon-emo').textContent=curBon.emoji;
+  document.getElementById('bon-msg').textContent=curBon.msg;
+  document.getElementById('bon-pts-val').textContent=curBon.pts;
+  document.getElementById('bon-kids').innerHTML=allM().map(k=>
+    `<div class="assign-chip" onclick="pickBonKid(this,${k.id})" style="padding:10px 14px;font-size:14px">
+      ${k.photo?'<img src="'+k.photo+'" class="bon-avatar">':'<span class="ac-em" style="font-size:22px">'+k.emoji+'</span>'} ${k.name}
+    </div>`
+  ).join('');
+  document.getElementById('ov-bonus').classList.add('open');
+}
+function pickBonKid(el,id){
+  bonKid=id;
+  document.querySelectorAll('#bon-kids .assign-chip').forEach(c=>c.classList.remove('assigned'));
+  el.classList.add('assigned');
+}
+function giveBonus(){
+  if(!bonKid||!curBon)return;
+  sfxBonus();
+  const log=tlog();
+  if(!log._bonus)log._bonus={};
+  log._bonus[bonKid]=(log._bonus[bonKid]||0)+curBon.pts;
+  sv();renderKidsBar();
+  closeOv(null,'ov-bonus');
+  spawn(20,innerWidth/2,innerHeight*.5,['🎁','⭐','🌟','✨','💎','👑','🥇','🎉','💪','🏆']);
+}
+
+/* ══ RESET ══ */
+function confirmReset(){document.getElementById('ov-confirm').classList.add('open');}
+function closeConfirm(e){if(e&&e.target!==document.getElementById('ov-confirm'))return;document.getElementById('ov-confirm').classList.remove('open');}
+function doReset(){try{sfxReset();}catch(e){}S.logs[today()]={};sv();renderTasks();renderKidsBar();closeConfirm();}
+function doRematch(){try{sfxRematch();}catch(e){}S.logs[today()]={};sv();closeOv(null,'ov-sum');renderTasks();renderKidsBar();try{spawn(10,innerWidth/2,innerHeight*.5);}catch(e){}}
+
+/* ══ SETTINGS ══ */
+function openSettings(){showScreen('setup');renderSetup();}
+
+/* ══ SHARE ══ */
+function buildShareText(){
+  const log=tlog();const kk=allM();const d=new Date();
+  const dateStr='יום '+HD[d.getDay()]+', '+d.getDate()+' '+HM[d.getMonth()];
+  let txt=`🏠 FamilyTasks — סיכום יומי\n📅 ${dateStr}\n\n`;
+  kk.forEach(k=>{
+    let pts=0,tasks=[];
+    S.tasks.forEach(t=>{
+      if(log['done_'+k.id+'_'+t.id]){pts+=t.pts;tasks.push(t.emoji+' '+t.name);}
+    });
+    if(log._bonus&&log._bonus[k.id])pts+=log._bonus[k.id];
+    txt+=`${k.emoji||'👤'} ${k.name}: ${pts} נקודות\n`;
+    if(tasks.length)tasks.forEach(function(t){txt+='  \u2705 '+t+'\n';});
+    txt+='\n';
+  });
+  txt+=`🏠 FamilyTasks`;
+  return txt;
+}
+function shareSummary(){const r=document.getElementById('share-row');r.style.display=r.style.display==='none'?'flex':'none';}
+function copyText(txt){
+  try{if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(()=>showToast('📋 הועתק!')).catch(()=>fallbackCopy(txt));}else{fallbackCopy(txt);}}catch(e){fallbackCopy(txt);}
+}
+function fallbackCopy(txt){const ta=document.createElement('textarea');ta.value=txt;ta.style.cssText='position:fixed;left:-9999px';document.body.appendChild(ta);ta.select();try{document.execCommand('copy');showToast('📋 הועתק!');}catch(e){showToast('לא הצלחתי להעתיק');}document.body.removeChild(ta);}
+function shareVia(method){
+  const txt=buildShareText();
+  if(method==='whatsapp')window.open('https://wa.me/?text='+encodeURIComponent(txt),'_blank');
+  else if(method==='copy')copyText(txt);
+  else if(method==='native'){try{if(navigator.share)navigator.share({title:'FamilyTasks 🏠',text:txt}).catch(()=>{});else copyText(txt);}catch(e){copyText(txt);}}
+}
+function sendSMS(){window.open('sms:?body='+encodeURIComponent(buildShareText()),'_self');closeOv(null,'ov-send');}
+function sendWhatsApp(){window.open('https://wa.me/?text='+encodeURIComponent(buildShareText()),'_blank');closeOv(null,'ov-send');}
+function sendPDF(){
+  const log=tlog();const kk=allM();const d=new Date();
+  let html=`<h1>🏠 FamilyTasks — ${d.getDate()+' '+HM[d.getMonth()]}</h1>`;
+  kk.forEach(k=>{
+    var pts=0,doneCount=0;
+    S.tasks.forEach(function(t){if(log['done_'+k.id+'_'+t.id]){pts+=t.pts;doneCount++;}});
+    if(log._bonus&&log._bonus[k.id])pts+=log._bonus[k.id];
+    html+=`<div class="pr-kid"><h2>${k.emoji||'👤'} ${k.name} — ${pts} נקודות (${doneCount} משימות)</h2>`;
+    S.tasks.forEach(t=>{
+      const done=log['done_'+k.id+'_'+t.id];
+      if(done)html+=`<div class="pr-task"><span class="em">${t.emoji}</span><span class="tnm">${t.name} (${t.pts} נק׳)</span><span class="chk">✅</span></div>`;
+    });
+    if(doneCount===0)html+=`<div class="pr-task" style="color:#999">אין משימות שהושלמו עדיין</div>`;
+    html+=`</div>`;
+  });
+  document.getElementById('print-area').innerHTML=html;
+  closeOv(null,'ov-send');
+  setTimeout(()=>window.print(),300);
+}
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200);}
+
+/* ══ FLYING ══ */
+function spawn(n,cx,cy,emojis){
+  const pool=emojis||['⭐','🌟','✨','💫','🎯','💪'];
+  const count=Math.max(n,12);
+  for(let i=0;i<count;i++){
+    setTimeout(()=>{
+      const el=document.createElement('div');el.className='hfly';
+      el.textContent=pool[Math.floor(Math.random()*pool.length)];
+      const sz=18+Math.random()*20;const ox=(Math.random()-.5)*180;
+      const dy=-(cy*0.6+Math.random()*cy*0.35);const rot=(Math.random()-.5)*65;
+      const dur=2+Math.random()*1;
+      el.style.cssText=`left:${cx+ox}px;top:${cy}px;font-size:${sz}px;--dy:${dy}px;--rot:${rot}deg;animation-duration:${dur}s;animation-delay:${i*45}ms`;
+      document.body.appendChild(el);setTimeout(()=>el.remove(),3500);
+    },i*38);
+  }
+}
+
+/* ══ NAV ══ */
+function closeOv(e,id){if(e&&e.target!==document.getElementById(id))return;document.getElementById(id).classList.remove('open');}
+function showScreen(n){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById('s-'+n).classList.add('active');}
+
+/* ══ THEMES ══ */
+const THEMES=[
+  {id:'default',label:'כחול'},
+  {id:'sunset',label:'שקיעה'},
+  {id:'forest',label:'יער'},
+  {id:'candy',label:'קנדי'},
+  {id:'night',label:'לילה'},
+];
+function renderThemeBar(){
+  const cur=S.theme||'default';
+  document.getElementById('theme-bar').innerHTML=THEMES.map(t=>
+    `<div class="theme-dot${t.id===cur?' active':''}" data-t="${t.id}" title="${t.label}" onclick="setTheme('${t.id}')"></div>`
+  ).join('');
+}
+function setTheme(id){
+  S.theme=id;sv();
+  document.documentElement.setAttribute('data-theme',id==='default'?'':id);
+  renderThemeBar();
+  showToast('🎨 ערכת צבעים: '+THEMES.find(t=>t.id===id).label);
+}
+function applyTheme(){
+  const t=S.theme||'default';
+  document.documentElement.setAttribute('data-theme',t==='default'?'':t);
+}
+
+/* ══ HISTORY ══ */
+let histView='week';
+function openHistory(){
+  histView='week';
+  renderHistory();
+  document.getElementById('ov-hist').classList.add('open');
+}
+function setHistView(v){
+  histView=v;
+  document.getElementById('hv-week').style.background=v==='week'?'var(--blue-light)':'rgba(255,255,255,.8)';
+  document.getElementById('hv-week').style.color=v==='week'?'var(--blue-dark)':'var(--muted)';
+  document.getElementById('hv-month').style.background=v==='month'?'var(--blue-light)':'rgba(255,255,255,.8)';
+  document.getElementById('hv-month').style.color=v==='month'?'var(--blue-dark)':'var(--muted)';
+  renderHistory();
+}
+function renderHistory(){
+  const days=histView==='week'?7:30;
+  const kk=allM();
+  let html='';
+  let hasAny=false;
+  for(let i=0;i<days;i++){
+    const d=new Date();d.setDate(d.getDate()-i);
+    const key=d.toISOString().slice(0,10);
+    const log=S.logs[key];
+    if(!log||Object.keys(log).length===0)continue;
+    hasAny=true;
+    const HD2=['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'];
+    const HM2=['ינואר','פברואר','מרץ','אפריל','מאי','יוני','יולי','אוגוסט','ספטמבר','אוקטובר','נובמבר','דצמבר'];
+    const dayLabel=i===0?'היום':i===1?'אתמול':'יום '+HD2[d.getDay()]+', '+d.getDate()+' '+HM2[d.getMonth()];
+    html+=`<div style="margin-bottom:14px">
+      <div style="font-size:12px;font-weight:800;color:var(--blue-dark);margin-bottom:6px;padding:4px 8px;background:var(--blue-light);border-radius:8px;display:inline-block">${dayLabel}</div>`;
+    kk.forEach(k=>{
+      let pts=0,tasks=[];
+      S.tasks.forEach(t=>{if(log['done_'+k.id+'_'+t.id]){pts+=t.pts;tasks.push(t.emoji+' '+t.name);}});
+      if(log._bonus&&log._bonus[k.id])pts+=log._bonus[k.id];
+      if(pts===0&&tasks.length===0)return;
+      html+=`<div style="display:flex;align-items:flex-start;gap:8px;padding:8px 10px;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;margin-bottom:5px">
+        <span style="font-size:20px">${k.emoji}</span>
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:800">${k.name} <span style="color:var(--blue);font-size:12px">${pts} נק׳</span></div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px">${tasks.join(' · ')||'—'}</div>
+        </div>
+      </div>`;
+    });
+    html+=`</div>`;
+  }
+  if(!hasAny)html=`<div style="text-align:center;padding:30px;color:var(--muted);font-size:13px">אין היסטוריה עדיין 📭</div>`;
+  document.getElementById('hist-content').innerHTML=html;
+  setHistView(histView);
+}
+
+/* ══ PUSH NOTIFICATIONS ══ */
+function openPushSettings(){
+  updatePushStatus();
+  const s=S.pushSettings||{};
+  if(s.time)document.getElementById('push-time').value=s.time;
+  if(s.before)document.getElementById('push-before').value=s.before;
+  document.getElementById('ov-push').classList.add('open');
+}
+function updatePushStatus(){
+  const el=document.getElementById('push-status');
+  if(!('Notification' in window)){
+    el.textContent='❌ הדפדפן לא תומך בהתראות';return;
+  }
+  if(Notification.permission==='granted')el.innerHTML='✅ התראות מופעלות';
+  else if(Notification.permission==='denied')el.innerHTML='🚫 התראות חסומות — פתח הגדרות דפדפן';
+  else el.innerHTML='💡 לחץ "הפעל התראות" לאישור';
+}
+function requestPushPermission(){
+  if(!('Notification' in window)){showToast('הדפדפן לא תומך בהתראות');return;}
+  Notification.requestPermission().then(p=>{
+    updatePushStatus();
+    if(p==='granted'){showToast('✅ התראות הופעלו!');scheduleDailyNotif();}
+    else showToast('לא ניתן לשלוח התראות');
+  });
+}
+function savePushTime(){
+  if(!S.pushSettings)S.pushSettings={};
+  S.pushSettings.time=document.getElementById('push-time').value;
+  S.pushSettings.before=document.getElementById('push-before').value;
+  sv();showToast('⏰ תזכורת נשמרה ל-'+S.pushSettings.time);
+  scheduleDailyNotif();
+}
+function scheduleDailyNotif(){
+  if(Notification.permission!=='granted')return;
+  const s=S.pushSettings||{};
+  if(!s.time)return;
+  const [h,m]=s.time.split(':').map(Number);
+  const now=new Date();
+  const next=new Date();next.setHours(h,m,0,0);
+  if(next<=now)next.setDate(next.getDate()+1);
+  const ms=next-now;
+  clearTimeout(window._pushTimer);
+  window._pushTimer=setTimeout(()=>{
+    try{
+      new Notification('🏠 FamilyTasks',{
+        body:'בוקר טוב! אל תשכחו למלא משימות היום 💪',
+        icon:'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"%3E%3Ctext y=".9em" font-size="90"%3E🏠%3C/text%3E%3C/svg%3E'
+      });
+    }catch(e){}
+    scheduleDailyNotif();
+  },ms);
+}
+function checkDeadlineNotifs(){
+  if(Notification.permission!=='granted')return;
+  const s=S.pushSettings||{};
+  const before=parseInt(s.before)||0;
+  if(!before)return;
+  const log=tlog();
+  S.tasks.forEach(t=>{
+    if(!t.deadline)return;
+    const dl=new Date(t.deadline);
+    const now=new Date();
+    const mins=Math.round((dl-now)/60000);
+    if(mins>0&&mins<=before&&mins>before-2){
+      const assigned=allM().filter(k=>log['assign_'+k.id+'_'+t.id]&&!log['done_'+k.id+'_'+t.id]);
+      if(assigned.length>0){
+        try{
+          new Notification('⏰ '+t.name,{
+            body:`נותרו ${mins} דקות! ${assigned.map(k=>k.name).join(', ')} — קדימה!`,
+          });
+        }catch(e){}
+      }
+    }
+  });
+}
+setInterval(checkDeadlineNotifs,60000);
+
+/* ══ INIT ══ */
+(function(){
+  const had=ld();
+  if(had){patchDeadlines();patchRecurDeadlines();S.logs[today()]={};sv();}
+  applyTheme();
+  renderSetup();
+  if(had&&S.members&&S.members.length){
+    bootMain();showScreen('main');
+  } else {
+    showScreen('setup');
+  }
+  if(Notification.permission==='granted')scheduleDailyNotif();
+})();
+</script>
+</body>
+</html>
